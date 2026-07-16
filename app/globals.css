@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-emerald: #0D5B45;
+  --color-emerald-deep: #083F30;
+  --color-gold: #D4AF37;
+  --color-ivory: #F7F5F0;
+  --color-ink: #1B1B1B;
+  --color-stone: #666666;
+
+  --font-display: var(--font-playfair), serif;
+  --font-body: var(--font-poppins), sans-serif;
+  --font-utility: var(--font-inter), sans-serif;
+}
