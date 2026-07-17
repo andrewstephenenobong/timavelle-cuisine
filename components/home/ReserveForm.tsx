@@ -9,7 +9,9 @@ import Button from '@/components/ui/Button';
 const reservationSchema = z.object({
   name: z.string().min(2, 'Please enter your full name'),
   email: z.string().email('Please enter a valid email'),
-  partySize: z.coerce.number().min(1, 'Party size must be at least 1').max(50, 'For groups over 50, contact us directly'),
+  partySize: z.number()
+  .min(1, 'Party size must be at least 1')
+  .max(50, 'For groups over 50, contact us directly'),
   date: z.string().min(1, 'Please choose a date').refine((value) => {
     const today = new Date();
     const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -66,7 +68,7 @@ export default function ReserveForm() {
 
       <div>
         <input
-          {...register('partySize')}
+          {...register('partySize', { valueAsNumber: true })}
           type="number"
           placeholder="Party size"
           className="w-full rounded-xl border border-stone/20 px-4 py-3 font-body"
