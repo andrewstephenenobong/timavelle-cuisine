@@ -1,4 +1,5 @@
 import DishIllustration from '@/components/ui/DishIllustration';
+import Reveal from '@/components/ui/Reveal';
 
 export default function GalleryPreview() {
   return (
@@ -7,10 +8,11 @@ export default function GalleryPreview() {
         A quiet look at the table.
       </h2>
       <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-        <DishIllustration variant="board" />
-        <DishIllustration variant="plate" />
-        <DishIllustration variant="bowl" />
-        <DishIllustration variant="plate" />
+        {['board', 'plate', 'bowl', 'plate'].map((variant, i) => (
+          <Reveal key={i} delay={i * 0.08}>
+            <DishIllustration variant={variant as 'board' | 'plate' | 'bowl'} />
+          </Reveal>
+        ))}
       </div>
     </section>
   );

@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import AboutTeaser from '@/components/home/AboutTeaser';
+
+export const metadata: Metadata = {
+  title: 'About — Timavelle Cuisine',
+  description: 'The story and philosophy behind Timavelle Cuisine, a private culinary house.',
+};
 
 export default function AboutPage() {
   return (

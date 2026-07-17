@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import GalleryPreview from '@/components/home/GalleryPreview';
+
+export const metadata: Metadata = {
+  title: 'Gallery — Timavelle Cuisine',
+  description: 'A look at events, plated courses, and kitchen service at Timavelle Cuisine.',
+};
 
 export default function GalleryPage() {
   return (

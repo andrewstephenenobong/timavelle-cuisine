@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import MenuPreview from '@/components/home/MenuPreview';
+
+export const metadata: Metadata = {
+  title: 'Menu — Timavelle Cuisine',
+  description: 'A short, seasonal menu from Timavelle Cuisine, held to a high standard.',
+};
 
 export default function MenuPage() {
   return (
