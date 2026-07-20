@@ -34,7 +34,6 @@ export default function ReserveForm() {
   });
 
   function onSubmit(data: ReservationForm) {
-    console.log('Reservation request:', data);
     setSubmitted(true);
   }
 

@@ -22,7 +22,7 @@ export default function AboutTeaser() {
       <Reveal delay={0.15}>
         <div className="mx-auto max-w-sm overflow-hidden rounded-3xl">
          <Image
-          src="/images/about/image.png"
+          src="/images/About/image.png"
           alt="Timavelle Cuisine — plated dish"
           width={720}
           height={1080}

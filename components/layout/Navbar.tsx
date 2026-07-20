@@ -5,6 +5,16 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import LinkButton from '@/components/ui/LinkButton';
 
+const navLinks = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'Menu', href: '/menu' },
+  { label: 'Gallery', href: '/gallery' },
+  { label: 'Services', href: '/services' },
+  { label: 'FAQs', href: '/faqs' },
+  { label: 'Contact', href: '/contact' },
+];
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
 
@@ -16,11 +26,12 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          <Link href="/" className="font-utility text-sm text-ink hover:text-gold">Home</Link>
-          <Link href="/about" className="font-utility text-sm text-ink hover:text-gold">About</Link>
-          <Link href="/menu" className="font-utility text-sm text-ink hover:text-gold">Menu</Link>
-          <Link href="/gallery" className="font-utility text-sm text-ink hover:text-gold">Gallery</Link>
-          <LinkButton href="/#reserve" className="!px-5 !py-2 text-xs">Reserve a Table</LinkButton>
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="font-utility text-sm text-ink hover:text-gold">
+              {link.label}
+            </Link>
+          ))}
+          <LinkButton href="/#reserve" className="px-5! py-2! text-xs">Reserve a Table</LinkButton>
         </div>
 
         <button aria-label="Toggle menu" onClick={() => setOpen(!open)} className="md:hidden">
@@ -30,10 +41,11 @@ export default function Navbar() {
 
       {open && (
         <div className="flex flex-col gap-4 bg-ivory px-6 pb-6 md:hidden">
-          <Link href="/" onClick={() => setOpen(false)} className="font-utility text-sm text-ink">Home</Link>
-          <Link href="/about" onClick={() => setOpen(false)} className="font-utility text-sm text-ink">About</Link>
-          <Link href="/menu" onClick={() => setOpen(false)} className="font-utility text-sm text-ink">Menu</Link>
-          <Link href="/gallery" onClick={() => setOpen(false)} className="font-utility text-sm text-ink">Gallery</Link>
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="font-utility text-sm text-ink">
+              {link.label}
+            </Link>
+          ))}
           <LinkButton href="/#reserve" className="w-full text-center">Reserve a Table</LinkButton>
         </div>
       )}
