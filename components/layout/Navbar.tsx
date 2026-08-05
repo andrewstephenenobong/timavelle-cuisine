@@ -31,7 +31,7 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <LinkButton href="/#reserve" className="px-5! py-2! text-xs">Reserve a Table</LinkButton>
+          <LinkButton href="/#reserve" className="px-5! py-2! text-xs">Start an Enquiry</LinkButton>
         </div>
 
         <button aria-label="Toggle menu" onClick={() => setOpen(!open)} className="md:hidden">
@@ -46,7 +46,7 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <LinkButton href="/#reserve" className="w-full text-center">Reserve a Table</LinkButton>
+          <LinkButton href="/#reserve" className="w-full text-center">Start an Enquiry</LinkButton>
         </div>
       )}
     </header>
