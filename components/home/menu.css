@@ -1,0 +1,3 @@
+/* Timavelle menu section: the full-menu action must remain readable without relying on hover. */
+.tv-menu-footer a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--tv-deep) !important; background: var(--tv-gold); text-decoration: none; }
+.tv-menu-footer a:hover { color: var(--tv-paper) !important; background: var(--tv-evergreen); }
