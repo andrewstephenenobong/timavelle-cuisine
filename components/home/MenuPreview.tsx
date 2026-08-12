@@ -24,28 +24,29 @@ export default async function MenuPreview() {
   const featured = items.filter((i) => i.image).slice(0, 3);
 
   return (
-    <section id="menu" className="bg-emerald/5 px-6 py-24 md:px-16">
-      <h2 className="mb-12 text-center font-display text-4xl font-medium text-ink">
-        A short list, held to a high standard.
-      </h2>
+    <section id="menu" className="tv-section tv-section--dark">
+      <div className="tv-section__rail"><strong>03</strong><span>The menu</span></div>
+      <div className="tv-section__head"><div><div className="tv-eyebrow">A short list</div><h2>Held to a<br /><em>high standard.</em></h2></div><p>Menus are shaped around the mood of your event, with familiar flavours given a more considered finish.</p></div>
 
       {featured.length === 0 ? (
-        <p className="text-center font-body text-stone">Our menu is being finalized — check back soon.</p>
+        <p className="text-center font-body text-ivory/60">Our menu is being finalized — check back soon.</p>
       ) : (
-        <div className="grid gap-8 md:grid-cols-3">
-          {featured.map((item) => (
-            <div key={item._id} className="overflow-hidden rounded-3xl bg-white shadow-lg">
-              <img src={item.image} alt={item.name} className="h-56 w-full object-cover" />
-              <div className="p-6">
-                <h3 className="font-display text-xl font-semibold text-ink">{item.name}</h3>
-                <p className="mt-2 font-body text-sm text-stone">{item.description}</p>
+        <div className="tv-menu-grid">
+          {featured.map((item, index) => (
+            <div key={item._id} className="tv-menu-card">
+              <div className="tv-menu-card__image"><img src={item.image} alt={item.name} /><span>0{index + 1}</span></div>
+              <div className="tv-menu-card__body">
+                <div className="tv-menu-card__category">{item.category}</div>
+                <h3>{item.name}</h3>
+                <p>{item.description}</p>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <div className="mt-10 text-center">
+      <div className="tv-menu-footer">
+        <span>Menus change with the room.</span>
         <LinkButton href="/menu">View Full Menu</LinkButton>
       </div>
     </section>
