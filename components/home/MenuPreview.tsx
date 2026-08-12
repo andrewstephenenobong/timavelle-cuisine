@@ -1,4 +1,6 @@
+/* Timavelle menu section: high-contrast CTA treatment on the evergreen editorial surface. */
 import LinkButton from '@/components/ui/LinkButton';
+import './menu.css';
 
 interface MenuItem {
   _id: string;
