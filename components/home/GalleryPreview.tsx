@@ -22,17 +22,16 @@ export default async function GalleryPreview() {
   const images = (await getImages()).slice(0, 6);
 
   return (
-    <section id="gallery" className="bg-ivory px-6 py-24 md:px-16">
-      <h2 className="mb-12 text-center font-display text-4xl font-medium text-ink">
-        A quiet look at the table.
-      </h2>
+    <section id="gallery" className="tv-section">
+      <div className="tv-section__rail"><strong>04</strong><span>Gallery</span></div>
+      <div className="tv-section__head"><div><div className="tv-eyebrow">From the table</div><h2>A little<br /><em>visual appetite.</em></h2></div><p>A glimpse into the palette, texture, and generous spirit behind every Timavelle table.</p></div>
 
       {images.length === 0 ? (
         <p className="text-center font-body text-stone">Our gallery is being updated — check back soon.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+        <div className="tv-gallery-grid">
           {images.map((img) => (
-            <img key={img._id} src={img.imageUrl} alt={img.caption || img.category} className="aspect-square w-full rounded-2xl object-cover" />
+            <div key={img._id} className="tv-gallery-item"><img src={img.imageUrl} alt={img.caption || img.category} /><div className="tv-gallery-item__label"><strong>{img.category}</strong><span>{img.caption || 'From the table'}</span></div></div>
           ))}
         </div>
       )}

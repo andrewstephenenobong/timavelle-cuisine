@@ -59,26 +59,29 @@ export default function EnquiryForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" aria-label="Timavelle enquiry form">
       <div>
-        <input {...register('name')} placeholder="Full name" className="w-full rounded-xl border border-stone/20 px-4 py-3 font-body" />
+        <label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-name">Name</label>
+        <input id="enquiry-name" autoComplete="name" {...register('name')} placeholder="Your name" className="w-full border-b border-stone/20 px-0 py-3 font-body" />
         {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
       </div>
 
       <div>
-        <input {...register('email')} placeholder="Email" className="w-full rounded-xl border border-stone/20 px-4 py-3 font-body" />
+        <label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-email">Email</label>
+        <input id="enquiry-email" autoComplete="email" {...register('email')} placeholder="you@example.com" className="w-full border-b border-stone/20 px-0 py-3 font-body" />
         {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
       </div>
 
-      <input {...register('phone')} placeholder="Phone (optional)" className="w-full rounded-xl border border-stone/20 px-4 py-3 font-body" />
+      <div><label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-phone">Phone <span className="text-stone/60">(optional)</span></label><input id="enquiry-phone" autoComplete="tel" {...register('phone')} placeholder="+234 …" className="w-full border-b border-stone/20 px-0 py-3 font-body" /></div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <input {...register('eventDate')} type="date" placeholder="Event date (optional)" className="w-full rounded-xl border border-stone/20 px-4 py-3 font-body" />
-        <input {...register('partySize')} type="number" placeholder="Party size (optional)" className="w-full rounded-xl border border-stone/20 px-4 py-3 font-body" />
+        <label className="font-utility text-xs uppercase tracking-wider text-ink">Event date <input {...register('eventDate')} type="date" className="mt-2 w-full border-b border-stone/20 px-0 py-3 font-body" /></label>
+        <label className="font-utility text-xs uppercase tracking-wider text-ink">Guests <input {...register('partySize')} type="number" placeholder="Optional" className="mt-2 w-full border-b border-stone/20 px-0 py-3 font-body" /></label>
       </div>
 
       <div>
-        <textarea {...register('message')} placeholder="Tell us about your event or question" rows={4} className="w-full rounded-xl border border-stone/20 px-4 py-3 font-body" />
+        <label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-message">Tell us about the room</label>
+        <textarea id="enquiry-message" {...register('message')} placeholder="The kind of occasion, the feeling, and anything we should know…" rows={4} className="w-full border-b border-stone/20 px-0 py-3 font-body" />
         {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>}
       </div>
 
