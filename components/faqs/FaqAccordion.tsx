@@ -1,10 +1,11 @@
+/* Timavelle public FAQs: published API content with the current four-record fallback. */
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
-const faqs = [
+const fallbackFaqs = [
   {
     q: 'How far in advance should I book?',
     a: 'For private dinners, two to three weeks is comfortable. For weddings or large events, six to eight weeks lets us plan properly, including a tasting.',
@@ -24,7 +25,18 @@ const faqs = [
 ];
 
 export default function FaqAccordion() {
+  const [faqs, setFaqs] = useState(fallbackFaqs);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://timavelle-cuisine-backend.onrender.com';
+    fetch(`${apiUrl}/api/faqs`)
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('FAQs unavailable')))
+      .then((payload: { items?: Array<{ question: string; answer: string }> }) => {
+        if (payload.items?.length) setFaqs(payload.items.map((item) => ({ q: item.question, a: item.answer })));
+      })
+      .catch(() => undefined);
+  }, []);
 
   return (
     <section className="bg-ivory px-6 py-24 md:px-16">
