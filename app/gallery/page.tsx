@@ -1,31 +1,14 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { getGalleryImages } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Gallery — Timavelle Cuisine',
   description: 'A look at Timavelle Cuisine events, plated courses, and kitchen service.',
 };
 
-interface GalleryImage {
-  _id: string;
-  imageUrl: string;
-  caption?: string;
-  category: string;
-}
-
-async function getImages(): Promise<GalleryImage[]> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.images || [];
-  } catch {
-    return [];
-  }
-}
-
 export default async function GalleryPage() {
-  const images = await getImages();
+  const images = await getGalleryImages();
 
   return (
     <>

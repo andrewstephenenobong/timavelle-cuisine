@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Button from '@/components/ui/Button';
+import { submitEnquiry } from '@/lib/api';
 
 const enquirySchema = z.object({
   name: z.string().min(2, 'Please enter your full name'),
@@ -33,17 +34,7 @@ export default function EnquiryForm() {
   async function onSubmit(data: EnquiryFormOutput) {
     setServerError('');
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/enquiries`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.error || 'Something went wrong. Please try again.');
-      }
-
+      await submitEnquiry(data);
       setSubmitted(true);
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');

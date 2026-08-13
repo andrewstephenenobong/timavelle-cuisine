@@ -1,26 +1,9 @@
 import LinkButton from '@/components/ui/LinkButton';
 import Image from 'next/image';
-
-interface GalleryImage {
-  _id: string;
-  imageUrl: string;
-  caption?: string;
-  category: string;
-}
-
-async function getImages(): Promise<GalleryImage[]> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.images || [];
-  } catch {
-    return [];
-  }
-}
+import { getGalleryImages } from '@/lib/api';
 
 export default async function GalleryPreview() {
-  const images = (await getImages()).slice(0, 6);
+  const images = (await getGalleryImages()).slice(0, 6);
 
   return (
     <section id="gallery" className="tv-section">

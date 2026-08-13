@@ -1,29 +1,11 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { getMenuItems } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Menu — Timavelle Cuisine',
   description: 'The Timavelle Cuisine signature menu.',
 };
-
-interface MenuItem {
-  _id: string;
-  name: string;
-  description: string;
-  category: string;
-  image?: string;
-}
-
-async function getMenuItems(): Promise<MenuItem[]> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/menu`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.items || [];
-  } catch {
-    return [];
-  }
-}
 
 export default async function MenuPage() {
   const items = await getMenuItems();

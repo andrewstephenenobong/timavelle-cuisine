@@ -1,26 +1,8 @@
 /* Timavelle menu section: high-contrast CTA treatment on the evergreen editorial surface. */
 import LinkButton from '@/components/ui/LinkButton';
 import Image from 'next/image';
+import { getMenuItems, type MenuItem } from '@/lib/api';
 import './menu.css';
-
-interface MenuItem {
-  _id: string;
-  name: string;
-  description: string;
-  category: string;
-  image?: string;
-}
-
-async function getMenuItems(): Promise<MenuItem[]> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/menu`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.items || [];
-  } catch {
-    return [];
-  }
-}
 
 export default async function MenuPreview() {
   const items = await getMenuItems();

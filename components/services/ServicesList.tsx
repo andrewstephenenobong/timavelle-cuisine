@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import Reveal from '@/components/ui/Reveal';
+import { getServices } from '@/lib/api';
 
 const fallbackServices = [
   {
@@ -27,13 +28,9 @@ export default function ServicesList() {
   const [services, setServices] = useState(fallbackServices);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://timavelle-cuisine-backend.onrender.com';
-    fetch(`${apiUrl}/api/services`)
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Services unavailable')))
-      .then((payload: { items?: Array<{ title: string; description: string }> }) => {
-        if (payload.items?.length) setServices(payload.items.map((item) => ({ name: item.title, desc: item.description })));
-      })
-      .catch(() => undefined);
+    void getServices().then((items) => {
+      if (items.length) setServices(items.map((item) => ({ name: item.title, desc: item.description })));
+    });
   }, []);
 
   return (
