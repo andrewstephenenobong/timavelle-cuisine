@@ -55,30 +55,31 @@ export default function EnquiryForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" aria-label="Timavelle enquiry form">
       <div>
         <label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-name">Name</label>
-        <input id="enquiry-name" autoComplete="name" {...register('name')} placeholder="Your name" className="w-full border-b border-stone/20 px-0 py-3 font-body" />
-        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+        <input id="enquiry-name" autoComplete="name" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'enquiry-name-error' : undefined} {...register('name')} placeholder="Your name" className="w-full border-b border-stone/20 px-0 py-3 font-body" />
+        {errors.name && <p id="enquiry-name-error" role="alert" className="mt-1 text-sm text-red-700">{errors.name.message}</p>}
       </div>
 
       <div>
         <label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-email">Email</label>
-        <input id="enquiry-email" autoComplete="email" {...register('email')} placeholder="you@example.com" className="w-full border-b border-stone/20 px-0 py-3 font-body" />
-        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+        <input id="enquiry-email" autoComplete="email" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'enquiry-email-error' : undefined} {...register('email')} placeholder="you@example.com" className="w-full border-b border-stone/20 px-0 py-3 font-body" />
+        {errors.email && <p id="enquiry-email-error" role="alert" className="mt-1 text-sm text-red-700">{errors.email.message}</p>}
       </div>
 
-      <div><label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-phone">Phone <span className="text-stone/60">(optional)</span></label><input id="enquiry-phone" autoComplete="tel" {...register('phone')} placeholder="+234 …" className="w-full border-b border-stone/20 px-0 py-3 font-body" /></div>
+      <div><label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-phone">Phone <span className="text-stone">(optional)</span></label><input id="enquiry-phone" autoComplete="tel" {...register('phone')} placeholder="+234 …" className="w-full border-b border-stone/20 px-0 py-3 font-body" /></div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="font-utility text-xs uppercase tracking-wider text-ink">Event date <input {...register('eventDate')} type="date" className="mt-2 w-full border-b border-stone/20 px-0 py-3 font-body" /></label>
-        <label className="font-utility text-xs uppercase tracking-wider text-ink">Guests <input {...register('partySize')} type="number" placeholder="Optional" className="mt-2 w-full border-b border-stone/20 px-0 py-3 font-body" /></label>
+        <label className="font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-event-date">Event date <input id="enquiry-event-date" {...register('eventDate')} type="date" className="mt-2 w-full border-b border-stone/20 px-0 py-3 font-body" /></label>
+        <label className="font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-party-size">Guests <input id="enquiry-party-size" aria-invalid={Boolean(errors.partySize)} aria-describedby={errors.partySize ? 'enquiry-party-size-error' : undefined} {...register('partySize')} type="number" placeholder="Optional" className="mt-2 w-full border-b border-stone/20 px-0 py-3 font-body" /></label>
       </div>
+      {errors.partySize && <p id="enquiry-party-size-error" role="alert" className="text-sm text-red-700">{errors.partySize.message}</p>}
 
       <div>
         <label className="mb-2 block font-utility text-xs uppercase tracking-wider text-ink" htmlFor="enquiry-message">Tell us about the room</label>
-        <textarea id="enquiry-message" {...register('message')} placeholder="The kind of occasion, the feeling, and anything we should know…" rows={4} className="w-full border-b border-stone/20 px-0 py-3 font-body" />
-        {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>}
+        <textarea id="enquiry-message" aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? 'enquiry-message-error' : undefined} {...register('message')} placeholder="The kind of occasion, the feeling, and anything we should know…" rows={4} className="w-full border-b border-stone/20 px-0 py-3 font-body" />
+        {errors.message && <p id="enquiry-message-error" role="alert" className="mt-1 text-sm text-red-700">{errors.message.message}</p>}
       </div>
 
-      {serverError && <p className="text-sm text-red-600">{serverError}</p>}
+      {serverError && <p role="alert" aria-live="assertive" className="text-sm text-red-700">{serverError}</p>}
 
       <Button type="submit" disabled={isSubmitting} className="mt-2 disabled:opacity-50">
         {isSubmitting ? 'Sending…' : 'Send Enquiry'}
