@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import ServicesList from '@/components/services/ServicesList';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Services — Timavelle Cuisine',
   description: 'Private dining, corporate events, weddings, and personal chef services from Timavelle Cuisine.',

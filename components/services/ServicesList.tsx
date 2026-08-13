@@ -1,7 +1,5 @@
 /* Timavelle public services: published API content with a static editorial fallback. */
-'use client';
 
-import { useEffect, useState } from 'react';
 import Reveal from '@/components/ui/Reveal';
 import { getServices } from '@/lib/api';
 
@@ -24,14 +22,9 @@ const fallbackServices = [
   },
 ];
 
-export default function ServicesList() {
-  const [services, setServices] = useState(fallbackServices);
-
-  useEffect(() => {
-    void getServices().then((items) => {
-      if (items.length) setServices(items.map((item) => ({ name: item.title, desc: item.description })));
-    });
-  }, []);
+export default async function ServicesList() {
+  const items = await getServices();
+  const services = items.length ? items.map((item) => ({ name: item.title, desc: item.description })) : fallbackServices;
 
   return (
     <section className="bg-ivory px-6 py-24 md:px-16">
