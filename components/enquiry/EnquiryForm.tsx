@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { track } from '@vercel/analytics';
 import Button from '@/components/ui/Button';
 import { submitEnquiry } from '@/lib/api';
 
@@ -35,6 +36,7 @@ export default function EnquiryForm() {
     setServerError('');
     try {
       await submitEnquiry(data);
+      track('enquiry_submitted', { source: 'contact-form' });
       setSubmitted(true);
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
