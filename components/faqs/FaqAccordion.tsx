@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
+import { getFaqs } from '@/lib/api';
 
 const fallbackFaqs = [
   {
@@ -29,13 +30,9 @@ export default function FaqAccordion() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://timavelle-cuisine-backend.onrender.com';
-    fetch(`${apiUrl}/api/faqs`)
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error('FAQs unavailable')))
-      .then((payload: { items?: Array<{ question: string; answer: string }> }) => {
-        if (payload.items?.length) setFaqs(payload.items.map((item) => ({ q: item.question, a: item.answer })));
-      })
-      .catch(() => undefined);
+    void getFaqs().then((items) => {
+      if (items.length) setFaqs(items.map((item) => ({ q: item.question, a: item.answer })));
+    });
   }, []);
 
   return (
