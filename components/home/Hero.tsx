@@ -1,5 +1,6 @@
 import LinkButton from '@/components/ui/LinkButton';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 
 export default function Hero() {
@@ -14,7 +15,7 @@ export default function Hero() {
           <Link href="/#menu" className="tv-hero__link">Explore the menu <ArrowDownRight size={15} /></Link>
         </div>
       </div>
-      <div className="tv-hero__visual"><div className="tv-hero__image"><img src="/images/About/image.png" alt="A plated Timavelle Cuisine dish" /></div><div className="tv-hero__note">A considered table<br />01 / 04</div></div>
+      <div className="tv-hero__visual"><div className="tv-hero__image"><Image src="/images/About/image.png" alt="A plated Timavelle Cuisine dish" width={760} height={920} priority /></div><div className="tv-hero__note">A considered table<br />01 / 04</div></div>
     </section>
   );
 }

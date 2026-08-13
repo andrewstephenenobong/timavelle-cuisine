@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'Menu — Timavelle Cuisine',
@@ -41,7 +42,7 @@ export default async function MenuPage() {
           <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-3">
             {items.map((item) => (
               <div key={item._id} className="overflow-hidden rounded-3xl bg-white shadow-lg">
-                {item.image && <img src={item.image} alt={item.name} className="h-56 w-full object-cover" />}
+                {item.image && <Image src={item.image} alt={item.name} width={900} height={520} className="h-56 w-full object-cover" />}
                 <div className="p-6">
                   <p className="font-utility text-xs uppercase tracking-wide text-stone/70">{item.category}</p>
                   <h3 className="mt-1 font-display text-xl font-semibold text-ink">{item.name}</h3>
