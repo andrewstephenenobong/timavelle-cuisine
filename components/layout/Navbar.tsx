@@ -24,7 +24,7 @@ export default function Navbar() {
           <span className="tv-mark" aria-hidden="true"><span className="tv-mark__bar" /><span className="tv-mark__bar" /><span className="tv-mark__bar" /></span>
           <span className="tv-wordmark__name"><span>Timavelle</span><span className="tv-wordmark__suffix">Cuisine</span></span>
         </Link>
-        <div className="tv-nav-links" data-open={open}>
+        <div id="primary-navigation" className="tv-nav-links" data-open={open}>
           {navLinks.map((link, index) => (
             <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="tv-nav-link">
               <span>0{index + 1}</span>{link.label}
@@ -32,7 +32,7 @@ export default function Navbar() {
           ))}
           <LinkButton href="/#reserve" className="tv-nav-button">Plan an event <ArrowUpRight size={14} /></LinkButton>
         </div>
-        <button aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen(!open)} className="tv-mobile-toggle">
+        <button aria-controls="primary-navigation" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen(!open)} className="tv-mobile-toggle">
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </nav>

@@ -6,7 +6,7 @@ export default function Hero() {
   return (
     <section className="tv-hero">
       <div className="tv-hero__copy">
-        <div className="tv-hero__eyebrow">Private culinary house <span className="ml-6 opacity-50">Est. 2021</span></div>
+        <div className="tv-hero__eyebrow">Private culinary house <span className="ml-6 opacity-50">Est. 2026</span></div>
         <h1>Crafting flavors.<br /><em>Creating memories.</em></h1>
         <p>Authentic African delicacies and refined international cuisine, prepared for the rooms and occasions that matter.</p>
         <div className="tv-hero__actions">
