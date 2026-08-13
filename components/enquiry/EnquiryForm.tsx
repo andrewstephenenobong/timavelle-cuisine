@@ -26,7 +26,7 @@ export default function EnquiryForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<EnquiryFormInput, any, EnquiryFormOutput>({
+  } = useForm<EnquiryFormInput, unknown, EnquiryFormOutput>({
     resolver: zodResolver(enquirySchema),
   });
 

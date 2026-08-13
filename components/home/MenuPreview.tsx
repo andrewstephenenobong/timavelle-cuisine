@@ -1,5 +1,6 @@
 /* Timavelle menu section: high-contrast CTA treatment on the evergreen editorial surface. */
 import LinkButton from '@/components/ui/LinkButton';
+import Image from 'next/image';
 import './menu.css';
 
 interface MenuItem {
@@ -23,7 +24,7 @@ async function getMenuItems(): Promise<MenuItem[]> {
 
 export default async function MenuPreview() {
   const items = await getMenuItems();
-  const featured = items.filter((i) => i.image).slice(0, 3);
+  const featured = items.filter((i): i is MenuItem & { image: string } => Boolean(i.image)).slice(0, 3);
 
   return (
     <section id="menu" className="tv-section tv-section--dark">
@@ -36,7 +37,7 @@ export default async function MenuPreview() {
         <div className="tv-menu-grid">
           {featured.map((item, index) => (
             <div key={item._id} className="tv-menu-card">
-              <div className="tv-menu-card__image"><img src={item.image} alt={item.name} /><span>0{index + 1}</span></div>
+              <div className="tv-menu-card__image"><Image src={item.image} alt={item.name} width={900} height={620} /><span>0{index + 1}</span></div>
               <div className="tv-menu-card__body">
                 <div className="tv-menu-card__category">{item.category}</div>
                 <h3>{item.name}</h3>

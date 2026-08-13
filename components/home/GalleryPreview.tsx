@@ -1,4 +1,5 @@
 import LinkButton from '@/components/ui/LinkButton';
+import Image from 'next/image';
 
 interface GalleryImage {
   _id: string;
@@ -31,7 +32,7 @@ export default async function GalleryPreview() {
       ) : (
         <div className="tv-gallery-grid">
           {images.map((img) => (
-            <div key={img._id} className="tv-gallery-item"><img src={img.imageUrl} alt={img.caption || img.category} /><div className="tv-gallery-item__label"><strong>{img.category}</strong><span>{img.caption || 'From the table'}</span></div></div>
+            <div key={img._id} className="tv-gallery-item"><Image src={img.imageUrl} alt={img.caption || img.category} width={720} height={720} /><div className="tv-gallery-item__label"><strong>{img.category}</strong><span>{img.caption || 'From the table'}</span></div></div>
           ))}
         </div>
       )}
