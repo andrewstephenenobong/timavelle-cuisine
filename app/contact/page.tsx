@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import EnquiryForm from '@/components/enquiry/EnquiryForm';
+import ContactDetails from '@/components/contact/ContactDetails';
 import WhatsAppButton from '@/components/ui/WhatsAppButton';
 
 export const metadata: Metadata = {
@@ -18,12 +19,7 @@ export default function ContactPage() {
       <section className="grid gap-12 bg-ivory px-6 py-24 md:grid-cols-2 md:px-16">
         <div className="flex flex-col gap-6">
           <h2 className="font-display text-2xl font-semibold text-ink">Visit or Reach Us</h2>
-          <ul className="flex flex-col gap-3 font-body text-stone">
-            <li>14 Ilaro Crescent, Lagos</li>
-            <li>Tue &ndash; Sun, 7am &ndash; 10pm</li>
-            <li>+234 908 331 7591</li>
-            <li>hello@timavellecuisine.com</li>
-          </ul>
+          <ContactDetails />
           <WhatsAppButton className="mt-2 self-start" />
         </div>
 
