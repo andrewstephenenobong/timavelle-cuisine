@@ -10,7 +10,7 @@ export default function ReserveCTA() {
 
       <div className="tv-reserve__card">
         <EnquiryForm />
-        <span className="block py-4 text-center font-utility text-xs uppercase tracking-widest text-stone/60">or</span>
+        <span className="block py-4 text-center font-utility text-xs uppercase tracking-widest text-stone">or</span>
         <WhatsAppButton />
       </div>
     </section>

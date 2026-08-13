@@ -50,7 +50,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
         <Navbar />
-        {children}
+        <main id="main-content">{children}</main>
         <Footer />
         <Analytics />
       </body>
