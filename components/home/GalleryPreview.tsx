@@ -14,8 +14,16 @@ export default async function GalleryPreview() {
         <p className="text-center font-body text-stone">Our gallery is being updated — check back soon.</p>
       ) : (
         <div className="tv-gallery-grid">
-          {images.map((img) => (
-            <div key={img._id} className="tv-gallery-item"><Image src={img.imageUrl} alt={img.caption || img.category} width={720} height={720} /><div className="tv-gallery-item__label"><strong>{img.category}</strong><span>{img.caption || 'From the table'}</span></div></div>
+          {images.map((img, index) => (
+            <article key={img._id} className={`tv-gallery-item${index === 0 ? ' tv-gallery-item--large' : ''}`}>
+              <div className="tv-gallery-item__media">
+                <Image src={img.imageUrl} alt={img.caption || img.category || 'Timavelle Cuisine gallery image'} width={720} height={720} />
+              </div>
+              <div className="tv-gallery-item__label">
+                <strong>{img.category || 'From the table'}</strong>
+                <span>{img.caption || 'A considered moment from the Timavelle table.'}</span>
+              </div>
+            </article>
           ))}
         </div>
       )}
