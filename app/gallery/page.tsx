@@ -21,9 +21,17 @@ export default async function GalleryPage() {
         {images.length === 0 ? (
           <p className="text-center font-body text-stone">Our gallery is being updated — check back soon.</p>
         ) : (
-          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 md:grid-cols-4">
+          <div className="tv-gallery-page-grid">
             {images.map((img) => (
-              <Image key={img._id} src={img.imageUrl} alt={img.caption || img.category} width={720} height={720} className="aspect-square w-full rounded-2xl object-cover" />
+              <article key={img._id} className="tv-gallery-page-card">
+                <div className="tv-gallery-page-card__media">
+                  <Image src={img.imageUrl} alt={img.caption || img.category || 'Timavelle Cuisine gallery image'} width={720} height={720} className="tv-gallery-page-card__image" />
+                </div>
+                <div className="tv-gallery-page-card__content">
+                  <span>{img.category || 'From the table'}</span>
+                  <h2>{img.caption || 'A considered moment from the Timavelle table.'}</h2>
+                </div>
+              </article>
             ))}
           </div>
         )}
