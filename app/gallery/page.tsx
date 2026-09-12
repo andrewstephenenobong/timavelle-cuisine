@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { getGalleryImages } from '@/lib/api';
+import GalleryViewer from '@/components/gallery/GalleryViewer';
 
 export const metadata: Metadata = {
   title: 'Gallery — Timavelle Cuisine',
@@ -10,32 +10,14 @@ export const metadata: Metadata = {
 export default async function GalleryPage() {
   const images = await getGalleryImages();
 
-  return (
-    <>
-      <section className="bg-emerald-deep px-6 py-32 text-center text-ivory">
-        <span className="font-utility text-xs uppercase tracking-[0.3em] text-gold">Gallery</span>
-        <h1 className="mt-4 font-display text-5xl font-medium">A Quiet Look at the Table</h1>
-      </section>
-
-      <section className="bg-ivory px-6 py-24 md:px-16">
-        {images.length === 0 ? (
-          <p className="text-center font-body text-stone">Our gallery is being updated — check back soon.</p>
-        ) : (
-          <div className="tv-gallery-page-grid">
-            {images.map((img) => (
-              <article key={img._id} className="tv-gallery-page-card">
-                <div className="tv-gallery-page-card__media">
-                  <Image src={img.imageUrl} alt={img.caption || img.category || 'Timavelle Cuisine gallery image'} width={720} height={720} className="tv-gallery-page-card__image" />
-                </div>
-                <div className="tv-gallery-page-card__content">
-                  <span>{img.category || 'From the table'}</span>
-                  <h2>{img.caption || 'A considered moment from the Timavelle table.'}</h2>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-    </>
-  );
+  return <>
+    <section className="bg-emerald-deep px-6 py-32 text-center text-ivory">
+      <span className="font-utility text-xs uppercase tracking-[0.3em] text-gold">Gallery</span>
+      <h1 className="mt-4 font-display text-5xl font-medium">A Quiet Look at the Table</h1>
+      <p className="mx-auto mt-5 max-w-xl font-body text-base leading-7 text-ivory/75">Browse the table at your own pace. Select any image to open it, move between moments, or zoom in for a closer look.</p>
+    </section>
+    <section className="bg-ivory px-4 py-16 md:px-10 md:py-24">
+      {images.length === 0 ? <p className="text-center font-body text-stone">Our gallery is being updated — check back soon.</p> : <GalleryViewer images={images} />}
+    </section>
+  </>;
 }
