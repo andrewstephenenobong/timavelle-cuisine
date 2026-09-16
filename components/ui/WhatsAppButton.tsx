@@ -5,7 +5,7 @@ interface WhatsAppButtonProps {
   className?: string;
 }
 
-const PHONE_NUMBER = '2349083317591';
+const PHONE_NUMBER = '2347015990266';
 
 export default function WhatsAppButton({
   message = "Hi Timavelle Cuisine! I'd like to enquire about an event.",
