@@ -37,7 +37,7 @@ const structuredData = {
   '@type': 'FoodEstablishment',
   name: 'Timavelle Cuisine',
   url: 'https://timavelle-cuisine.vercel.app',
-  telephone: '+2347015990266',
+  telephone: '+234 701 599 0266',
   email: 'hello@timavellecuisine.com',
   address: { '@type': 'PostalAddress', streetAddress: '14 Ilaro Crescent', addressLocality: 'Lagos', addressCountry: 'NG' },
   openingHours: 'Tu-Su 07:00-22:00',

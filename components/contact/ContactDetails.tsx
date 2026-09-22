@@ -7,7 +7,7 @@ import { getContactDetails, type ContactDetail } from '@/lib/api';
 const fallbackDetails: ContactDetail[] = [
   { key: 'address', value: '14 Ilaro Crescent, Lagos' },
   { key: 'hours', value: 'Tue – Sun, 7am – 10pm' },
-  { key: 'phone', value: '+2347015990266 ' },
+  { key: 'phone', value: '+234 701 599 0266' },
   { key: 'email', value: 'hello@timavellecuisine.com' },
 ];
 
