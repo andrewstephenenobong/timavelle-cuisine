@@ -7,9 +7,27 @@ import type { GalleryImage } from '@/lib/api';
 type Props = { images: GalleryImage[] };
 
 export default function GalleryViewer({ images }: Props) {
+  const [activeCollection, setActiveCollection] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
-  const selected = selectedIndex === null ? null : images[selectedIndex];
+
+  const collections = useMemo(() => {
+    const map = new Map<string, GalleryImage[]>();
+    images.forEach((image) => {
+      const key = image.category || 'From the table';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(image);
+    });
+    return Array.from(map.entries()).map(([name, items]) => ({ name, items }));
+  }, [images]);
+
+  const visibleImages = useMemo(() => {
+    if (!activeCollection) return images;
+    return images.filter((image) => (image.category || 'From the table') === activeCollection);
+  }, [images, activeCollection]);
+
+  const showCollections = activeCollection === null && collections.length > 1;
+  const selected = selectedIndex === null ? null : visibleImages[selectedIndex];
 
   const close = () => {
     setSelectedIndex(null);
@@ -21,11 +39,21 @@ export default function GalleryViewer({ images }: Props) {
     setZoom(1);
   };
 
+  const openCollection = (name: string) => {
+    setActiveCollection(name);
+    setSelectedIndex(null);
+  };
+
+  const backToCollections = () => {
+    setActiveCollection(null);
+    setSelectedIndex(null);
+  };
+
   const move = useCallback((direction: -1 | 1) => {
-    if (selectedIndex === null || images.length === 0) return;
-    setSelectedIndex((selectedIndex + direction + images.length) % images.length);
+    if (selectedIndex === null || visibleImages.length === 0) return;
+    setSelectedIndex((selectedIndex + direction + visibleImages.length) % visibleImages.length);
     setZoom(1);
-  }, [images.length, selectedIndex]);
+  }, [visibleImages.length, selectedIndex]);
 
   useEffect(() => {
     if (selectedIndex === null) return;
@@ -44,17 +72,32 @@ export default function GalleryViewer({ images }: Props) {
     };
   }, [move, selectedIndex]);
 
-  const counter = useMemo(() => selectedIndex === null ? '' : `${selectedIndex + 1} of ${images.length}`, [selectedIndex, images.length]);
+  const counter = useMemo(() => selectedIndex === null ? '' : `${selectedIndex + 1} of ${visibleImages.length}`, [selectedIndex, visibleImages.length]);
 
   return <>
-    <div className="tv-gallery-wall" aria-label="Timavelle Cuisine gallery">
-      {images.map((image, index) => (
-        <button type="button" className="tv-gallery-tile" key={image._id} onClick={() => open(index)} aria-label={`Open ${image.caption || image.category || 'gallery image'}`}>
-          <Image src={image.imageUrl} alt={image.caption || image.category || 'Timavelle Cuisine gallery image'} width={900} height={900} unoptimized className="tv-gallery-tile__image" />
-          <span className="tv-gallery-tile__meta"><strong>{image.caption || 'Timavelle Cuisine'}</strong><small>{image.category || 'From the table'}</small></span>
-        </button>
-      ))}
-    </div>
+    {showCollections ? (
+      <div className="tv-gallery-collections" aria-label="Gallery collections">
+        {collections.map((collection) => (
+          <button type="button" className="tv-gallery-collection" key={collection.name} onClick={() => openCollection(collection.name)} aria-label={`Open ${collection.name} collection, ${collection.items.length} photos`}>
+            <Image src={collection.items[0].imageUrl} alt={collection.name} width={600} height={450} unoptimized className="tv-gallery-collection__image" />
+            <span className="tv-gallery-collection__meta"><strong>{collection.name}</strong><small>{collection.items.length} photo{collection.items.length === 1 ? '' : 's'}</small></span>
+          </button>
+        ))}
+      </div>
+    ) : <>
+      {collections.length > 1 && <div className="tv-gallery-toolbar">
+        <button type="button" className="tv-gallery-back" onClick={backToCollections}>&larr; All Collections</button>
+        {activeCollection && <span className="tv-gallery-toolbar__label">{activeCollection}</span>}
+      </div>}
+      <div className="tv-gallery-wall" aria-label="Timavelle Cuisine gallery">
+        {visibleImages.map((image, index) => (
+          <button type="button" className="tv-gallery-tile" key={image._id} onClick={() => open(index)} aria-label={`Open ${image.caption || image.category || 'gallery image'}`}>
+            <Image src={image.imageUrl} alt={image.caption || image.category || 'Timavelle Cuisine gallery image'} width={900} height={900} unoptimized className="tv-gallery-tile__image" />
+            <span className="tv-gallery-tile__meta"><strong>{image.caption || 'Timavelle Cuisine'}</strong><small>{image.category || 'From the table'}</small></span>
+          </button>
+        ))}
+      </div>
+    </>}
 
     {selected && selectedIndex !== null && <div className="tv-gallery-lightbox" role="dialog" aria-modal="true" aria-label="Gallery image viewer" onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
       <div className="tv-gallery-lightbox__topbar"><span>{counter}</span><div className="tv-gallery-lightbox__actions"><button type="button" onClick={() => setZoom((value) => Math.max(1, Number((value - 0.25).toFixed(2))))} disabled={zoom <= 1} aria-label="Zoom out">−</button><span>{Math.round(zoom * 100)}%</span><button type="button" onClick={() => setZoom((value) => Math.min(3, Number((value + 0.25).toFixed(2))))} disabled={zoom >= 3} aria-label="Zoom in">+</button><button type="button" onClick={close} aria-label="Close image viewer">×</button></div></div>

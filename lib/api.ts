@@ -36,6 +36,13 @@ export interface HeroImage {
   publishedAt?: string;
 }
 
+export interface AboutImage {
+  _id?: string;
+  imageUrl: string;
+  altText: string;
+  publishedAt?: string;
+} 
+
 export interface FaqItem {
   _id: string;
   question: string;
@@ -112,6 +119,15 @@ export async function getServices(): Promise<ServiceItem[]> {
 export async function getHeroImage(): Promise<HeroImage | null> {
   try {
     const payload = await publicApiRequest<{ item?: HeroImage | null }>('/hero-image');
+    return payload.item || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getAboutImage(): Promise<AboutImage | null> {
+  try {
+    const payload = await publicApiRequest<{ item?: AboutImage | null }>('/about-image');
     return payload.item || null;
   } catch {
     return null;

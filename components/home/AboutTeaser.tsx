@@ -2,8 +2,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import Reveal from '@/components/ui/Reveal';
+import { getAboutImage } from '@/lib/api';
 
-export default function AboutTeaser() {
+export default async function AboutTeaser() {
+  const aboutImage = await getAboutImage();
   return (
     <section id="about" className="tv-section tv-about">
       <div className="tv-section__rail"><strong>02</strong><span>The house</span></div>
@@ -27,8 +29,8 @@ export default function AboutTeaser() {
         <div>
         <div className="tv-about__image">
          <Image
-          src="/images/About/image.png"
-          alt="Timavelle Cuisine — plated dish"
+          src={aboutImage?.imageUrl || '/images/About/image.png'}
+          alt={aboutImage?.altText || 'Timavelle Cuisine — plated dish'}
           width={720}
           height={1080}
           className="h-auto w-full object-cover"
