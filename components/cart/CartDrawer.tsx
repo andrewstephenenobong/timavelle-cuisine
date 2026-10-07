@@ -8,6 +8,7 @@ import QuantityStepper from '@/components/menu/QuantityStepper';
 import CheckoutForm from './CheckoutForm';
 import type { OrderResponse } from '@/lib/api';
 import { buildWhatsAppUrl } from '@/lib/whatsapp';
+import { downloadOrderReceipt } from '@/lib/order-receipt';
 
 function formatNaira(value: number) {
   return `₦${value.toLocaleString('en-NG')}`;
@@ -20,6 +21,8 @@ export default function CartDrawer() {
   const [step, setStep] = useState<Step>('cart');
   const [placedOrder, setPlacedOrder] = useState<OrderResponse | null>(null);
   const [placedMessage, setPlacedMessage] = useState('');
+  const [receiptDownloaded, setReceiptDownloaded] = useState(false);
+  const [receiptError, setReceiptError] = useState('');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -34,7 +37,7 @@ export default function CartDrawer() {
 
   useEffect(() => {
     if (isOpen) return;
-    const timer = window.setTimeout(() => { setStep('cart'); setPlacedOrder(null); setPlacedMessage(''); }, 300);
+    const timer = window.setTimeout(() => { setStep('cart'); setPlacedOrder(null); setPlacedMessage(''); setReceiptDownloaded(false); setReceiptError(''); }, 300);
     return () => window.clearTimeout(timer);
   }, [isOpen]);
 
@@ -52,11 +55,20 @@ export default function CartDrawer() {
           <div className="tv-cart-drawer__success">
             <p className="tv-cart-drawer__success-mark" aria-hidden="true">✓</p>
             <h3>Thank you, {placedOrder.customerName.split(' ')[0]}.</h3>
-            <p>Your order has been received and saved. You can keep browsing, or choose to share the order details with us on WhatsApp.</p>
+            <p>{placedOrder.paymentMethod === 'bank_transfer' ? 'Your order has been saved. It is awaiting payment verification and is not confirmed as paid yet.' : 'Your order has been saved. Continue with us on WhatsApp to confirm the details.'}</p>
             <p className="tv-cart-drawer__success-total">Order reference: <strong>{placedOrder._id}</strong></p>
             <p className="tv-cart-drawer__success-total">Order total: {formatNaira(placedOrder.total)}</p>
-            <a className="tv-cart-drawer__continue" href={buildWhatsAppUrl(placedMessage)} target="_blank" rel="noreferrer">Share order on WhatsApp (optional)</a>
-            <a className="tv-cart-drawer__continue" href={buildWhatsAppUrl(`Hello Timavelle Cuisine, I would like to send a payment receipt for order #${placedOrder._id} (${formatNaira(placedOrder.total)}).`)} target="_blank" rel="noreferrer">Send a receipt via WhatsApp</a>
+            {placedOrder.paymentMethod === 'bank_transfer' && placedOrder.paymentInstructions && <section className="tv-checkout__transfer" aria-label="Bank transfer details for this order"><h3>Transfer to complete payment</h3><dl><div><dt>Bank</dt><dd>{placedOrder.paymentInstructions.bankName}</dd></div><div><dt>Account name</dt><dd>{placedOrder.paymentInstructions.accountName}</dd></div><div><dt>Account number</dt><dd><strong>{placedOrder.paymentInstructions.accountNumber}</strong></dd></div><div><dt>Amount</dt><dd>{formatNaira(placedOrder.total)}</dd></div></dl><p>After transferring, send your bank-issued payment proof on WhatsApp and include this order reference.</p></section>}
+            <p>Your downloadable order receipt is not proof of payment.</p>
+            <button type="button" className="tv-cart-drawer__continue" onClick={() => {
+              setReceiptError('');
+              void downloadOrderReceipt(placedOrder).then(() => setReceiptDownloaded(true)).catch(() => setReceiptError('We could not create the PDF. Please try again.'));
+            }}>Download order receipt (PDF)</button>
+            {receiptError && <p role="alert">{receiptError}</p>}
+            {placedOrder.paymentMethod === 'whatsapp' && <a className="tv-cart-drawer__continue" href={buildWhatsAppUrl(placedMessage)} target="_blank" rel="noreferrer">Continue via WhatsApp</a>}
+            {placedOrder.paymentMethod === 'bank_transfer' && <button type="button" className="tv-cart-drawer__continue" onClick={() => window.open(buildWhatsAppUrl(`Hello Timavelle Cuisine, I have transferred ${formatNaira(placedOrder.total)} for order #${placedOrder._id}. I am attaching my bank payment receipt for verification.`), '_blank', 'noopener,noreferrer')}>Send bank payment receipt via WhatsApp</button>}
+            {receiptDownloaded && <button type="button" className="tv-cart-drawer__continue" onClick={() => window.open(buildWhatsAppUrl(`Hello Timavelle Cuisine, please see the order summary PDF for order #${placedOrder._id}.`), '_blank', 'noopener,noreferrer')}>Share order summary PDF via WhatsApp</button>}
+            {!receiptDownloaded && <p role="status">Download the order summary PDF above before sharing that PDF on WhatsApp. For payment verification, attach your bank-issued transfer receipt instead.</p>}
             <a className="tv-cart-drawer__continue" href="/contact" onClick={closeCart}>Continue with an enquiry</a>
             <button type="button" className="tv-cart-drawer__continue" onClick={closeCart}>Continue browsing</button>
           </div>

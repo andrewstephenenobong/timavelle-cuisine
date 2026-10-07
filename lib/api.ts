@@ -180,7 +180,8 @@ export interface OrderPayload {
   orderType: 'delivery' | 'pickup';
   deliveryAddress?: string;
   notes?: string;
-  channel: 'whatsapp' | 'admin';
+  paymentMethod: 'bank_transfer' | 'whatsapp';
+  channel: 'website' | 'whatsapp' | 'admin';
   items: OrderItemPayload[];
 }
 
@@ -201,15 +202,45 @@ export interface OrderResponse {
   items: OrderResponseLine[];
   subtotal: number;
   total: number;
+  notes?: string;
+  paymentMethod: 'bank_transfer' | 'whatsapp';
+  paymentStatus: 'unpaid' | 'receipt_submitted' | 'paid' | 'rejected' | 'refunded';
+  paymentInstructions?: { bankName: string; accountName: string; accountNumber: string };
   status: string;
   createdAt: string;
 }
 
-export async function submitOrder(data: OrderPayload): Promise<OrderResponse> {
-  const payload = await publicApiRequest<{ order: OrderResponse }>('/orders', {
+export interface PreparedOrderResponse {
+  order: OrderResponse;
+  checkoutToken?: string;
+}
+
+export interface PaymentSettings {
+  bankTransferEnabled: boolean;
+  whatsappEnabled: boolean;
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+}
+
+export async function getPaymentSettings(): Promise<PaymentSettings> {
+  const payload = await publicApiRequest<{ settings: PaymentSettings }>('/payment-settings/public');
+  return payload.settings;
+}
+
+export async function submitOrder(data: OrderPayload): Promise<PreparedOrderResponse> {
+  return publicApiRequest<PreparedOrderResponse>('/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
+  });
+}
+
+export async function placePreparedOrder(orderId: string, checkoutToken: string): Promise<OrderResponse> {
+  const payload = await publicApiRequest<{ order: OrderResponse }>(`/orders/${encodeURIComponent(orderId)}/place`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ checkoutToken }),
   });
   return payload.order;
 }
