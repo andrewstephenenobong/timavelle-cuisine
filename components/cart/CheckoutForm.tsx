@@ -51,7 +51,9 @@ export default function CheckoutForm({ onBack, onPlaced }: { onBack: () => void;
   const [receipt, setReceipt] = useState<File | null>(null);
   const [receiptName, setReceiptName] = useState('');
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [copiedField, setCopiedField] = useState<'accountName' | 'accountNumber' | ''>('');
   const idempotencyKey = useId();
+  const receiptInputId = useId();
   const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<CheckoutInput>({ resolver: zodResolver(checkoutSchema), defaultValues: { orderType: 'delivery' } });
   const orderType = useWatch({ control, name: 'orderType' });
   const deliveryAreaId = useWatch({ control, name: 'deliveryAreaId' });
@@ -91,9 +93,49 @@ export default function CheckoutForm({ onBack, onPlaced }: { onBack: () => void;
     } catch (err) { setServerError(err instanceof Error ? err.message : 'We could not save the receipt. Your checkout is still available; please try again.'); } finally { setPlacingPreparedOrder(false); }
   }
 
+  async function copyPaymentValue(field: 'accountName' | 'accountNumber', value: string) {
+    try {
+      await navigator.clipboard?.writeText(value);
+      setCopiedField(field);
+      window.setTimeout(() => setCopiedField(''), 2200);
+    } catch {
+      setServerError('Copy was unavailable. Please select and copy the account detail manually.');
+    }
+  }
+
   if (pendingPaymentOrder) {
-    const { order } = pendingPaymentOrder; const instructions = order.paymentInstructions;
-    return <div className="tv-checkout" aria-label="Bank transfer checkout"><Progress payment /><button type="button" className="tv-checkout__back" onClick={onBack}>&larr; Back to cart</button><section className="tv-checkout__transfer"><p className="tv-eyebrow">Payment verification</p><h3>Transfer, then attach your receipt</h3><p>Transfer the exact total below. Your payment stays unverified until Timavelle checks it.</p><dl><div><dt>Order reference</dt><dd>{order._id}</dd></div><div><dt>Total to transfer</dt><dd><strong>{formatNaira(order.total)}</strong></dd></div><div><dt>Bank</dt><dd>{instructions?.bankName}</dd></div><div><dt>Account name</dt><dd><button type="button" className="tv-copy" onClick={() => void navigator.clipboard?.writeText(instructions?.accountName || '')}>{instructions?.accountName} · Copy</button></dd></div><div><dt>Account number</dt><dd><button type="button" className="tv-copy" onClick={() => void navigator.clipboard?.writeText(instructions?.accountNumber || '')}><strong>{instructions?.accountNumber}</strong> · Copy</button></dd></div></dl></section><label className="tv-checkout__confirm"><input type="checkbox" checked={paymentConfirmed} onChange={(event) => setPaymentConfirmed(event.target.checked)} /> I confirm that I have paid {formatNaira(order.total)} to the account above.</label><label className="tv-checkout__upload">Upload payment receipt<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(event) => { const file = event.target.files?.[0] || null; if (file && file.size > 8 * 1024 * 1024) { setServerError('Receipt must be 8 MB or smaller.'); return; } setReceipt(file); setReceiptName(file?.name || ''); setServerError(''); }} />{receiptName ? <strong>Attached: {receiptName}</strong> : <span>JPG, PNG, WebP or PDF · max 8 MB</span>}</label>{serverError && <p role="alert" className="tv-checkout__error">{serverError}</p>}<button type="button" className="tv-checkout__submit" onClick={() => void placeAfterTransfer()} disabled={placingPreparedOrder || !instructions}>{placingPreparedOrder ? 'Uploading receipt…' : 'Place order'}</button></div>;
+    const { order } = pendingPaymentOrder;
+    const instructions = order.paymentInstructions;
+    const receiptInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0] || null;
+      if (file && file.size > 8 * 1024 * 1024) {
+        setServerError('Receipt must be 8 MB or smaller.');
+        return;
+      }
+      setReceipt(file);
+      setReceiptName(file?.name || '');
+      setServerError('');
+    };
+    return <div className="tv-checkout tv-checkout--payment" aria-label="Bank transfer checkout">
+      <Progress payment />
+      <button type="button" className="tv-checkout__back" onClick={onBack}>&larr; Back to cart</button>
+      <section className="tv-payment-card" aria-labelledby="payment-title">
+        <div className="tv-payment-card__intro"><p className="tv-eyebrow">Payment verification</p><h3 id="payment-title">Transfer, then attach your receipt</h3><p>Use the account details below to make the exact transfer. Your order is only placed after the receipt is attached.</p></div>
+        <div className="tv-payment-callout"><span className="tv-payment-callout__icon" aria-hidden="true">₦</span><div><strong>Transfer exactly {formatNaira(order.total)}</strong><span>Timavelle will verify your payment before preparing the order.</span></div></div>
+        <dl className="tv-payment-details">
+          <div className="tv-payment-details__reference"><dt>Order reference</dt><dd>{order._id}</dd></div>
+          <div className="tv-payment-details__total"><dt>Total to transfer</dt><dd>{formatNaira(order.total)}</dd></div>
+          <div><dt>Bank</dt><dd>{instructions?.bankName || '—'}</dd></div>
+          <div><dt>Account name</dt><dd><span>{instructions?.accountName || '—'}</span><button type="button" className="tv-copy" onClick={() => void copyPaymentValue('accountName', instructions?.accountName || '')} disabled={!instructions?.accountName}>{copiedField === 'accountName' ? 'Copied' : 'Copy'}</button></dd></div>
+          <div><dt>Account number</dt><dd><strong>{instructions?.accountNumber || '—'}</strong><button type="button" className="tv-copy" onClick={() => void copyPaymentValue('accountNumber', instructions?.accountNumber || '')} disabled={!instructions?.accountNumber}>{copiedField === 'accountNumber' ? 'Copied' : 'Copy'}</button></dd></div>
+        </dl>
+      </section>
+      <label className="tv-checkout__confirm"><input type="checkbox" checked={paymentConfirmed} onChange={(event) => setPaymentConfirmed(event.target.checked)} /><span><strong>I have completed the transfer</strong><small>I confirm that I paid {formatNaira(order.total)} to the account above.</small></span></label>
+      <section className="tv-receipt-card" aria-labelledby="receipt-title"><div><p className="tv-eyebrow">Required before placing order</p><h3 id="receipt-title">Upload your payment receipt</h3><p>Attach a screenshot, photo, or PDF so our team can verify the transfer.</p></div><label className="tv-receipt-upload" htmlFor={receiptInputId}><input id={receiptInputId} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={receiptInput} /><span className="tv-receipt-upload__button"><span aria-hidden="true">↑</span>{receiptName ? 'Replace receipt' : 'Choose receipt file'}</span><span className="tv-receipt-upload__hint">JPG, PNG, WebP or PDF · max 8 MB</span></label>{receiptName && <div className="tv-receipt-upload__attached" role="status"><span aria-hidden="true">✓</span><span><strong>{receiptName}</strong><small>Receipt attached and ready to submit</small></span><button type="button" onClick={() => { setReceipt(null); setReceiptName(''); }}>Remove</button></div>}</section>
+      {serverError && <p role="alert" className="tv-checkout__error">{serverError}</p>}
+      <button type="button" className="tv-checkout__submit tv-checkout__submit--payment" onClick={() => void placeAfterTransfer()} disabled={placingPreparedOrder || !instructions || !paymentConfirmed || !receipt}>{placingPreparedOrder ? 'Uploading receipt…' : 'Place order securely'}</button>
+      <p className="tv-payment-security"><span aria-hidden="true">⌁</span>Your payment details are sent securely for Timavelle verification.</p>
+    </div>;
   }
 
   return <form onSubmit={handleSubmit(onSubmit)} className="tv-checkout" aria-label="Checkout"><Progress payment={false} /><button type="button" className="tv-checkout__back" onClick={onBack}>&larr; Back to cart</button><div className="tv-checkout__field"><label htmlFor="checkout-name">Full name</label><input id="checkout-name" autoComplete="name" {...register('customerName')} placeholder="Your name" aria-invalid={Boolean(errors.customerName)} />{errors.customerName && <p role="alert">{errors.customerName.message}</p>}</div><div className="tv-checkout__field"><label htmlFor="checkout-phone">Phone number</label><input id="checkout-phone" autoComplete="tel" {...register('customerPhone')} placeholder="+234 …" aria-invalid={Boolean(errors.customerPhone)} />{errors.customerPhone && <p role="alert">{errors.customerPhone.message}</p>}</div><fieldset className="tv-checkout__order-type"><legend>How should we fulfil it?</legend><label><input type="radio" value="delivery" {...register('orderType')} /> Delivery</label><label><input type="radio" value="pickup" {...register('orderType')} /> Pickup</label></fieldset>{orderType === 'delivery' && <><div className="tv-checkout__field"><label htmlFor="checkout-area">Delivery area</label><select id="checkout-area" {...register('deliveryAreaId')}><option value="">Choose your area…</option>{areas.map((area) => <option key={area._id} value={area._id}>{area.name} · {formatNaira(area.fee)}</option>)}</select>{errors.deliveryAreaId && <p role="alert">{errors.deliveryAreaId.message}</p>}{selectedArea && <small className="tv-checkout__hint">Delivery fee: {formatNaira(selectedArea.fee)}</small>}</div><div className="tv-checkout__field"><label htmlFor="checkout-address">Delivery address</label><textarea id="checkout-address" {...register('deliveryAddress')} placeholder="Street, house number, landmark" rows={3} aria-invalid={Boolean(errors.deliveryAddress)} />{errors.deliveryAddress && <p role="alert">{errors.deliveryAddress.message}</p>}</div></>}<div className="tv-checkout__field"><label htmlFor="checkout-discount">Discount code <span>(optional)</span></label><input id="checkout-discount" {...register('discountCode')} placeholder="Enter code" autoCapitalize="characters" /><small className="tv-checkout__hint">The server validates the code when your order is submitted.</small></div><div className="tv-checkout__field"><label htmlFor="checkout-notes">Order notes <span>(optional)</span></label><textarea id="checkout-notes" {...register('notes')} placeholder="Allergies, preferences, delivery instructions…" rows={3} /></div><fieldset className="tv-checkout__order-type tv-checkout__payment-choice"><legend>Payment</legend>{paymentSettings?.bankTransferEnabled && <label><input type="radio" name="paymentMethod" value="bank_transfer" checked={paymentMethod === 'bank_transfer'} onChange={() => setPaymentMethod('bank_transfer')} /> Bank transfer</label>}{paymentSettings?.whatsappEnabled && <label><input type="radio" name="paymentMethod" value="whatsapp" checked={paymentMethod === 'whatsapp'} onChange={() => setPaymentMethod('whatsapp')} /> WhatsApp</label>}</fieldset>{paymentMethod === 'bank_transfer' && <p className="tv-checkout__transfer-note">Your total, delivery fee, and discount will be calculated securely from the live menu and checkout settings.</p>}{settingsError && <p role="alert" className="tv-checkout__error">{settingsError}</p>}{serverError && <p role="alert" className="tv-checkout__error">{serverError}</p>}<button type="submit" className="tv-checkout__submit" disabled={isSubmitting || !paymentSettings || (!paymentSettings.bankTransferEnabled && !paymentSettings.whatsappEnabled)}>{isSubmitting ? 'Preparing checkout…' : paymentMethod === 'bank_transfer' ? 'Continue to payment' : 'Place order & continue via WhatsApp'}</button></form>;
