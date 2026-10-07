@@ -1,10 +1,17 @@
 const DEFAULT_API_URL = 'https://timavelle-cuisine-backend.onrender.com';
 
+export interface MenuAddOn {
+  name: string;
+  price: number;
+}
+
 export interface MenuItem {
   _id: string;
   name: string;
   description: string;
   category: string;
+  price: number;
+  addOns: MenuAddOn[];
   image?: string;
   featured?: boolean;
 }
@@ -158,4 +165,51 @@ export async function submitEnquiry(data: EnquiryPayload): Promise<void> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+}
+
+
+export interface OrderItemPayload {
+  menuItemId: string;
+  quantity: number;
+  addOns: string[];
+}
+
+export interface OrderPayload {
+  customerName: string;
+  customerPhone: string;
+  orderType: 'delivery' | 'pickup';
+  deliveryAddress?: string;
+  notes?: string;
+  channel: 'whatsapp' | 'admin';
+  items: OrderItemPayload[];
+}
+
+export interface OrderResponseLine {
+  name: string;
+  unitPrice: number;
+  quantity: number;
+  addOns: { name: string; price: number }[];
+  lineTotal: number;
+}
+
+export interface OrderResponse {
+  _id: string;
+  customerName: string;
+  customerPhone: string;
+  orderType: 'delivery' | 'pickup';
+  deliveryAddress?: string;
+  items: OrderResponseLine[];
+  subtotal: number;
+  total: number;
+  status: string;
+  createdAt: string;
+}
+
+export async function submitOrder(data: OrderPayload): Promise<OrderResponse> {
+  const payload = await publicApiRequest<{ order: OrderResponse }>('/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return payload.order;
 }

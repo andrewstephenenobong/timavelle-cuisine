@@ -5,6 +5,9 @@ import { Playfair_Display, Poppins } from 'next/font/google';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Analytics } from '@vercel/analytics/next';
+import { CartProvider } from '@/components/cart/CartProvider';
+import CartDrawer from '@/components/cart/CartDrawer';
+import FloatingCartBar from '@/components/cart/FloatingCartBar';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-playfair' });
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-poppins' });
@@ -49,9 +52,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className={`${playfair.variable} ${poppins.variable}`}>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
-        <Navbar />
-        <main id="main-content">{children}</main>
-        <Footer />
+        <CartProvider>
+          <Navbar />
+          <main id="main-content">{children}</main>
+          <Footer />
+          <FloatingCartBar />
+          <CartDrawer />
+        </CartProvider>
         <Analytics />
       </body>
     </html>

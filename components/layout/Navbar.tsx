@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
 import LinkButton from '@/components/ui/LinkButton';
+import CartTrigger from '@/components/cart/CartTrigger';
 
 const navLinks = [
   { label: 'The house', href: '/about' },
@@ -32,9 +33,12 @@ export default function Navbar() {
           ))}
           <LinkButton href="/#reserve" className="tv-nav-button">Plan an event <ArrowUpRight size={14} /></LinkButton>
         </div>
-        <button aria-controls="primary-navigation" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen(!open)} className="tv-mobile-toggle">
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        <div className="tv-nav-trailing">
+          <CartTrigger />
+          <button aria-controls="primary-navigation" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen(!open)} className="tv-mobile-toggle">
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </nav>
     </header>
   );
