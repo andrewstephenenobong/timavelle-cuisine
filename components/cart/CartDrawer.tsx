@@ -21,6 +21,7 @@ export default function CartDrawer() {
   const [step, setStep] = useState<Step>('cart');
   const [placedOrder, setPlacedOrder] = useState<OrderResponse | null>(null);
   const [placedMessage, setPlacedMessage] = useState('');
+  const [checkoutToken, setCheckoutToken] = useState('');
   const [receiptDownloaded, setReceiptDownloaded] = useState(false);
   const [receiptError, setReceiptError] = useState('');
 
@@ -37,7 +38,7 @@ export default function CartDrawer() {
 
   useEffect(() => {
     if (isOpen) return;
-    const timer = window.setTimeout(() => { setStep('cart'); setPlacedOrder(null); setPlacedMessage(''); setReceiptDownloaded(false); setReceiptError(''); }, 300);
+      const timer = window.setTimeout(() => { setStep('cart'); setPlacedOrder(null); setPlacedMessage(''); setCheckoutToken(''); setReceiptDownloaded(false); setReceiptError(''); }, 300);
     return () => window.clearTimeout(timer);
   }, [isOpen]);
 
@@ -57,6 +58,7 @@ export default function CartDrawer() {
             <h3>Thank you, {placedOrder.customerName.split(' ')[0]}.</h3>
             <p>{placedOrder.paymentMethod === 'bank_transfer' ? 'Your order has been saved. It is awaiting payment verification and is not confirmed as paid yet.' : 'Your order has been saved. Continue with us on WhatsApp to confirm the details.'}</p>
             <p className="tv-cart-drawer__success-total">Order reference: <strong>{placedOrder._id}</strong></p>
+            {checkoutToken && <a className="tv-cart-drawer__continue" href={`/orders/${encodeURIComponent(placedOrder._id)}?token=${encodeURIComponent(checkoutToken)}`}>View order status</a>}
             <p className="tv-cart-drawer__success-total">Order total: {formatNaira(placedOrder.total)}</p>
             {placedOrder.paymentMethod === 'bank_transfer' && placedOrder.paymentInstructions && <section className="tv-checkout__transfer" aria-label="Bank transfer details for this order"><h3>Transfer to complete payment</h3><dl><div><dt>Bank</dt><dd>{placedOrder.paymentInstructions.bankName}</dd></div><div><dt>Account name</dt><dd>{placedOrder.paymentInstructions.accountName}</dd></div><div><dt>Account number</dt><dd><strong>{placedOrder.paymentInstructions.accountNumber}</strong></dd></div><div><dt>Amount</dt><dd>{formatNaira(placedOrder.total)}</dd></div></dl><p>After transferring, send your bank-issued payment proof on WhatsApp and include this order reference.</p></section>}
             <p>Your downloadable order receipt is not proof of payment.</p>
@@ -73,7 +75,7 @@ export default function CartDrawer() {
             <button type="button" className="tv-cart-drawer__continue" onClick={closeCart}>Continue browsing</button>
           </div>
         ) : step === 'checkout' ? (
-          <CheckoutForm onBack={() => setStep('cart')} onPlaced={(order, message) => { setPlacedOrder(order); setPlacedMessage(message); setStep('success'); }} />
+          <CheckoutForm onBack={() => setStep('cart')} onPlaced={(order, message, token) => { setPlacedOrder(order); setPlacedMessage(message); setCheckoutToken(token || ''); setStep('success'); }} />
         ) : lines.length === 0 ? (
           <div className="tv-cart-drawer__empty">
             <p>Your cart is empty.</p>

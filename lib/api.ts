@@ -179,6 +179,8 @@ export interface OrderPayload {
   customerPhone: string;
   orderType: 'delivery' | 'pickup';
   deliveryAddress?: string;
+  deliveryAreaId?: string;
+  discountCode?: string;
   notes?: string;
   paymentMethod: 'bank_transfer' | 'whatsapp';
   channel: 'website' | 'whatsapp' | 'admin';
@@ -199,13 +201,19 @@ export interface OrderResponse {
   customerPhone: string;
   orderType: 'delivery' | 'pickup';
   deliveryAddress?: string;
+  deliveryAreaName?: string;
+  deliveryFee: number;
   items: OrderResponseLine[];
   subtotal: number;
+  discountCode?: string;
+  discountAmount: number;
   total: number;
   notes?: string;
   paymentMethod: 'bank_transfer' | 'whatsapp';
   paymentStatus: 'unpaid' | 'receipt_submitted' | 'paid' | 'rejected' | 'refunded';
   paymentInstructions?: { bankName: string; accountName: string; accountNumber: string };
+  receiptUrl?: string;
+  paymentRejectionReason?: string;
   status: string;
   createdAt: string;
 }
@@ -223,15 +231,22 @@ export interface PaymentSettings {
   accountNumber: string;
 }
 
+export interface DeliveryArea { _id: string; name: string; fee: number; active?: boolean; }
+
 export async function getPaymentSettings(): Promise<PaymentSettings> {
   const payload = await publicApiRequest<{ settings: PaymentSettings }>('/payment-settings/public');
   return payload.settings;
 }
 
-export async function submitOrder(data: OrderPayload): Promise<PreparedOrderResponse> {
+export async function getDeliveryAreas(): Promise<DeliveryArea[]> {
+  const payload = await publicApiRequest<{ items: DeliveryArea[] }>('/checkout-config/delivery-areas');
+  return payload.items || [];
+}
+
+export async function submitOrder(data: OrderPayload, idempotencyKey?: string): Promise<PreparedOrderResponse> {
   return publicApiRequest<PreparedOrderResponse>('/orders', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}) },
     body: JSON.stringify(data),
   });
 }
@@ -242,5 +257,18 @@ export async function placePreparedOrder(orderId: string, checkoutToken: string)
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ checkoutToken }),
   });
+  return payload.order;
+}
+
+export async function uploadPaymentReceipt(orderId: string, checkoutToken: string, file: File): Promise<OrderResponse> {
+  const body = new FormData();
+  body.append('checkoutToken', checkoutToken);
+  body.append('receipt', file);
+  const payload = await publicApiRequest<{ order: OrderResponse }>(`/orders/${encodeURIComponent(orderId)}/receipt`, { method: 'POST', body });
+  return payload.order;
+}
+
+export async function accessOrder(orderId: string, checkoutToken: string): Promise<OrderResponse> {
+  const payload = await publicApiRequest<{ order: OrderResponse }>(`/orders/${encodeURIComponent(orderId)}/access`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ checkoutToken }) });
   return payload.order;
 }
