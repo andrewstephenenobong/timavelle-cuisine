@@ -7,6 +7,7 @@ import { getLineTotal } from '@/lib/cart-types';
 import QuantityStepper from '@/components/menu/QuantityStepper';
 import CheckoutForm from './CheckoutForm';
 import type { OrderResponse } from '@/lib/api';
+import { buildWhatsAppUrl } from '@/lib/whatsapp';
 
 function formatNaira(value: number) {
   return `₦${value.toLocaleString('en-NG')}`;
@@ -18,6 +19,7 @@ export default function CartDrawer() {
   const { lines, subtotal, isOpen, closeCart, updateQuantity, removeLine, isHydrated } = useCart();
   const [step, setStep] = useState<Step>('cart');
   const [placedOrder, setPlacedOrder] = useState<OrderResponse | null>(null);
+  const [placedMessage, setPlacedMessage] = useState('');
 
   useEffect(() => {
     if (!isOpen) return;
@@ -32,7 +34,7 @@ export default function CartDrawer() {
 
   useEffect(() => {
     if (isOpen) return;
-    const timer = window.setTimeout(() => { setStep('cart'); setPlacedOrder(null); }, 300);
+    const timer = window.setTimeout(() => { setStep('cart'); setPlacedOrder(null); setPlacedMessage(''); }, 300);
     return () => window.clearTimeout(timer);
   }, [isOpen]);
 
@@ -42,7 +44,7 @@ export default function CartDrawer() {
     <div className="tv-cart-drawer" role="dialog" aria-modal="true" aria-label="Your cart" onClick={(event) => { if (event.target === event.currentTarget) closeCart(); }}>
       <div className="tv-cart-drawer__panel">
         <div className="tv-cart-drawer__head">
-          <h2>{step === 'checkout' ? 'Checkout' : step === 'success' ? 'Order sent' : 'Your cart'}</h2>
+          <h2>{step === 'checkout' ? 'Checkout' : step === 'success' ? 'Order placed' : 'Your cart'}</h2>
           <button type="button" onClick={closeCart} aria-label="Close cart">×</button>
         </div>
 
@@ -50,12 +52,16 @@ export default function CartDrawer() {
           <div className="tv-cart-drawer__success">
             <p className="tv-cart-drawer__success-mark" aria-hidden="true">✓</p>
             <h3>Thank you, {placedOrder.customerName.split(' ')[0]}.</h3>
-            <p>Your order has been sent — we&rsquo;ve also opened WhatsApp with your order ready to go. Please hit send there to confirm with us directly.</p>
+            <p>Your order has been received and saved. You can keep browsing, or choose to share the order details with us on WhatsApp.</p>
+            <p className="tv-cart-drawer__success-total">Order reference: <strong>{placedOrder._id}</strong></p>
             <p className="tv-cart-drawer__success-total">Order total: {formatNaira(placedOrder.total)}</p>
+            <a className="tv-cart-drawer__continue" href={buildWhatsAppUrl(placedMessage)} target="_blank" rel="noreferrer">Share order on WhatsApp (optional)</a>
+            <a className="tv-cart-drawer__continue" href={buildWhatsAppUrl(`Hello Timavelle Cuisine, I would like to send a payment receipt for order #${placedOrder._id} (${formatNaira(placedOrder.total)}).`)} target="_blank" rel="noreferrer">Send a receipt via WhatsApp</a>
+            <a className="tv-cart-drawer__continue" href="/contact" onClick={closeCart}>Continue with an enquiry</a>
             <button type="button" className="tv-cart-drawer__continue" onClick={closeCart}>Continue browsing</button>
           </div>
         ) : step === 'checkout' ? (
-          <CheckoutForm onBack={() => setStep('cart')} onPlaced={(order) => { setPlacedOrder(order); setStep('success'); }} />
+          <CheckoutForm onBack={() => setStep('cart')} onPlaced={(order, message) => { setPlacedOrder(order); setPlacedMessage(message); setStep('success'); }} />
         ) : lines.length === 0 ? (
           <div className="tv-cart-drawer__empty">
             <p>Your cart is empty.</p>

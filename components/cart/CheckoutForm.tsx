@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { track } from '@vercel/analytics';
 import { submitOrder, type OrderResponse } from '@/lib/api';
 import { useCart } from './CartProvider';
-import { buildOrderMessage, buildWhatsAppUrl } from '@/lib/whatsapp';
+import { buildOrderMessage } from '@/lib/whatsapp';
 
 function formatNaira(value: number) {
   return `₦${value.toLocaleString('en-NG')}`;
@@ -27,7 +27,7 @@ const checkoutSchema = z.object({
 
 type CheckoutInput = z.infer<typeof checkoutSchema>;
 
-export default function CheckoutForm({ onBack, onPlaced }: { onBack: () => void; onPlaced: (order: OrderResponse) => void }) {
+export default function CheckoutForm({ onBack, onPlaced }: { onBack: () => void; onPlaced: (order: OrderResponse, message: string) => void }) {
   const { lines, subtotal, clearCart } = useCart();
   const [serverError, setServerError] = useState('');
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<CheckoutInput>({
@@ -48,16 +48,10 @@ export default function CheckoutForm({ onBack, onPlaced }: { onBack: () => void;
         channel: 'whatsapp',
         items: lines.map((line) => ({ menuItemId: line.menuItemId, quantity: line.quantity, addOns: line.addOns.map((addOn) => addOn.name) })),
       });
-      const message = buildOrderMessage(
-        { customerName: data.customerName, customerPhone: data.customerPhone, orderType: data.orderType, deliveryAddress: data.deliveryAddress, notes: data.notes },
-        lines,
-        order.subtotal,
-        order.total,
-      );
-      window.open(buildWhatsAppUrl(message), '_blank', 'noopener,noreferrer');
+      const message = buildOrderMessage(order);
       track('order_submitted', { orderType: data.orderType, itemCount: lines.length });
       clearCart();
-      onPlaced(order);
+      onPlaced(order, message);
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong placing your order. Please try again.');
     }
