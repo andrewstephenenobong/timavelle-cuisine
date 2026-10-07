@@ -223,6 +223,10 @@ export interface PreparedOrderResponse {
   checkoutToken?: string;
 }
 
+export interface CustomerHistoryOrder extends Pick<OrderResponse, '_id' | 'customerName' | 'customerPhone' | 'orderType' | 'deliveryAreaName' | 'deliveryAddress' | 'items' | 'subtotal' | 'deliveryFee' | 'discountCode' | 'discountAmount' | 'total' | 'notes' | 'paymentMethod' | 'paymentStatus' | 'paymentRejectionReason' | 'status' | 'createdAt'> {
+  updatedAt?: string;
+}
+
 export interface PaymentSettings {
   bankTransferEnabled: boolean;
   whatsappEnabled: boolean;
@@ -271,4 +275,17 @@ export async function uploadPaymentReceipt(orderId: string, checkoutToken: strin
 export async function accessOrder(orderId: string, checkoutToken: string): Promise<OrderResponse> {
   const payload = await publicApiRequest<{ order: OrderResponse }>(`/orders/${encodeURIComponent(orderId)}/access`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ checkoutToken }) });
   return payload.order;
+}
+
+export async function requestCustomerOtp(phone: string): Promise<{ message: string; expiresInSeconds: number; devCode?: string }> {
+  return publicApiRequest('/customer-orders/request-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone }) });
+}
+
+export async function verifyCustomerOtp(phone: string, code: string): Promise<{ token: string; expiresInSeconds: number }> {
+  return publicApiRequest('/customer-orders/verify-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, code }) });
+}
+
+export async function getCustomerOrders(token: string): Promise<CustomerHistoryOrder[]> {
+  const payload = await publicApiRequest<{ orders: CustomerHistoryOrder[] }>('/customer-orders', { headers: { Authorization: `Bearer ${token}` } });
+  return payload.orders || [];
 }
