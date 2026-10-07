@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useCart } from './CartProvider';
 import { getLineTotal } from '@/lib/cart-types';
@@ -25,31 +25,35 @@ export default function CartDrawer() {
   const [receiptDownloaded, setReceiptDownloaded] = useState(false);
   const [receiptError, setReceiptError] = useState('');
 
+  const handleClose = useCallback(() => {
+    setStep('cart');
+    setPlacedOrder(null);
+    setPlacedMessage('');
+    setCheckoutToken('');
+    setReceiptDownloaded(false);
+    setReceiptError('');
+    closeCart();
+  }, [closeCart]);
+
   useEffect(() => {
     if (!isOpen) return;
     document.body.style.overflow = 'hidden';
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') closeCart(); };
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') handleClose(); };
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.body.style.overflow = '';
       document.removeEventListener('keydown', onKeyDown);
     };
-  }, [isOpen, closeCart]);
-
-  useEffect(() => {
-    if (isOpen) return;
-      const timer = window.setTimeout(() => { setStep('cart'); setPlacedOrder(null); setPlacedMessage(''); setCheckoutToken(''); setReceiptDownloaded(false); setReceiptError(''); }, 300);
-    return () => window.clearTimeout(timer);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   if (!isHydrated || !isOpen) return null;
 
   return (
-    <div className="tv-cart-drawer" role="dialog" aria-modal="true" aria-label="Your cart" onClick={(event) => { if (event.target === event.currentTarget) closeCart(); }}>
+    <div className="tv-cart-drawer" role="dialog" aria-modal="true" aria-label="Your cart" onClick={(event) => { if (event.target === event.currentTarget) handleClose(); }}>
       <div className="tv-cart-drawer__panel">
         <div className="tv-cart-drawer__head">
           <h2>{step === 'checkout' ? 'Checkout' : step === 'success' ? 'Order placed' : 'Your cart'}</h2>
-          <button type="button" onClick={closeCart} aria-label="Close cart">×</button>
+          <button type="button" onClick={handleClose} aria-label="Close cart">×</button>
         </div>
 
         {step === 'success' && placedOrder ? (
@@ -71,15 +75,15 @@ export default function CartDrawer() {
             {placedOrder.paymentMethod === 'bank_transfer' && <button type="button" className="tv-cart-drawer__continue" onClick={() => window.open(buildWhatsAppUrl(`Hello Timavelle Cuisine, I have transferred ${formatNaira(placedOrder.total)} for order #${placedOrder._id}. I am attaching my bank payment receipt for verification.`), '_blank', 'noopener,noreferrer')}>Send bank payment receipt via WhatsApp</button>}
             {receiptDownloaded && <button type="button" className="tv-cart-drawer__continue" onClick={() => window.open(buildWhatsAppUrl(`Hello Timavelle Cuisine, please see the order summary PDF for order #${placedOrder._id}.`), '_blank', 'noopener,noreferrer')}>Share order summary PDF via WhatsApp</button>}
             {!receiptDownloaded && <p role="status">Download the order summary PDF above before sharing that PDF on WhatsApp. For payment verification, attach your bank-issued transfer receipt instead.</p>}
-            <a className="tv-cart-drawer__continue" href="/contact" onClick={closeCart}>Continue with an enquiry</a>
-            <button type="button" className="tv-cart-drawer__continue" onClick={closeCart}>Continue browsing</button>
+            <a className="tv-cart-drawer__continue" href="/contact" onClick={handleClose}>Continue with an enquiry</a>
+            <button type="button" className="tv-cart-drawer__continue" onClick={handleClose}>Continue browsing</button>
           </div>
         ) : step === 'checkout' ? (
           <CheckoutForm onBack={() => setStep('cart')} onPlaced={(order, message, token) => { setPlacedOrder(order); setPlacedMessage(message); setCheckoutToken(token || ''); setStep('success'); }} />
         ) : lines.length === 0 ? (
           <div className="tv-cart-drawer__empty">
             <p>Your cart is empty.</p>
-            <button type="button" onClick={closeCart}>Browse the menu</button>
+            <button type="button" onClick={handleClose}>Browse the menu</button>
           </div>
         ) : (
           <>

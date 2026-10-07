@@ -39,14 +39,14 @@ function Progress({ payment }: { payment: boolean }) {
   return <ol className="tv-checkout__progress" aria-label="Checkout progress"><li data-active={!payment}>1 <span>Your details</span></li><li data-active={payment}>2 <span>Payment</span></li></ol>;
 }
 
-export default function CheckoutForm({ onBack, onPlaced }: { onBack: () => void; onPlaced: (order: OrderResponse, message: string, checkoutToken?: string) => void }) {
+export default function CheckoutForm({ onBack, onPlaced, resumePendingPayment = false }: { onBack: () => void; onPlaced: (order: OrderResponse, message: string, checkoutToken?: string) => void; resumePendingPayment?: boolean }) {
   const { lines, clearCart } = useCart();
   const [serverError, setServerError] = useState('');
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
   const [areas, setAreas] = useState<DeliveryArea[]>([]);
   const [settingsError, setSettingsError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank_transfer');
-  const [pendingPaymentOrder, setPendingPaymentOrder] = useState<PendingPaymentOrder | null>(readPendingPaymentOrder);
+  const [pendingPaymentOrder, setPendingPaymentOrder] = useState<PendingPaymentOrder | null>(() => resumePendingPayment ? readPendingPaymentOrder() : null);
   const [placingPreparedOrder, setPlacingPreparedOrder] = useState(false);
   const [receipt, setReceipt] = useState<File | null>(null);
   const [receiptName, setReceiptName] = useState('');
