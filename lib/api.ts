@@ -281,6 +281,10 @@ export async function requestCustomerOtp(phone: string): Promise<{ message: stri
   return publicApiRequest('/customer-orders/request-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone }) });
 }
 
+export async function lookupCustomerHistory(phone: string): Promise<{ token: string; expiresInSeconds: number }> {
+  return publicApiRequest('/customer-orders/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone }) });
+}
+
 export async function verifyCustomerOtp(phone: string, code: string): Promise<{ token: string; expiresInSeconds: number }> {
   return publicApiRequest('/customer-orders/verify-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, code }) });
 }
