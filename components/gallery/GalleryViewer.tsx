@@ -1,8 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type TouchEvent } from 'react';
 import type { GalleryImage } from '@/lib/api';
+import { galleryCover, galleryFull, galleryThumb } from '@/lib/cloudinary';
 
 type Props = { images: GalleryImage[] };
 
@@ -72,14 +73,37 @@ export default function GalleryViewer({ images }: Props) {
     };
   }, [move, selectedIndex]);
 
-  const counter = useMemo(() => selectedIndex === null ? '' : `${selectedIndex + 1} of ${visibleImages.length}`, [selectedIndex, visibleImages.length]);
+    // Warm the browser cache for the photos either side of the open one so next/previous feels instant.
+  useEffect(() => {
+    if (selectedIndex === null || visibleImages.length < 2) return;
+    [-1, 1].forEach((offset) => {
+      const neighbour = visibleImages[(selectedIndex + offset + visibleImages.length) % visibleImages.length];
+      if (neighbour) { const preload = new window.Image(); preload.src = galleryFull(neighbour.imageUrl); }
+    });
+  }, [selectedIndex, visibleImages]);
+
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  function onTouchStart(event: TouchEvent) {
+    touchStart.current = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
+  }
+  function onTouchEnd(event: TouchEvent) {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start || zoom > 1) return;
+    const dx = event.changedTouches[0].clientX - start.x;
+    const dy = event.changedTouches[0].clientY - start.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) move(dx < 0 ? 1 : -1);
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5) close();
+  }
+  
+  const counter = useMemo(() => selectedIndex === null ? '' : `${selectedIndex + 1} / ${visibleImages.length}`, [selectedIndex, visibleImages.length]);
 
   return <>
     {showCollections ? (
       <div className="tv-gallery-collections" aria-label="Gallery collections">
         {collections.map((collection) => (
           <button type="button" className="tv-gallery-collection" key={collection.name} onClick={() => openCollection(collection.name)} aria-label={`Open ${collection.name} collection, ${collection.items.length} photos`}>
-            <Image src={collection.items[0].imageUrl} alt={collection.name} width={600} height={450} unoptimized className="tv-gallery-collection__image" />
+            <Image src={galleryCover(collection.items[0].imageUrl)} alt={collection.name} width={600} height={450} unoptimized className="tv-gallery-collection__image" />
             <span className="tv-gallery-collection__meta"><strong>{collection.name}</strong><small>{collection.items.length} photo{collection.items.length === 1 ? '' : 's'}</small></span>
           </button>
         ))}
@@ -92,7 +116,7 @@ export default function GalleryViewer({ images }: Props) {
       <div className="tv-gallery-wall" aria-label="Timavelle Cuisine gallery">
         {visibleImages.map((image, index) => (
           <button type="button" className="tv-gallery-tile" key={image._id} onClick={() => open(index)} aria-label={`Open ${image.caption || image.category || 'gallery image'}`}>
-            <Image src={image.imageUrl} alt={image.caption || image.category || 'Timavelle Cuisine gallery image'} width={900} height={900} unoptimized className="tv-gallery-tile__image" />
+            <Image src={galleryThumb(image.imageUrl)} alt={image.caption || image.category || 'Timavelle Cuisine gallery image'} width={480} height={480} unoptimized loading="lazy" className="tv-gallery-tile__image" />
             <span className="tv-gallery-tile__meta"><strong>{image.caption || 'Timavelle Cuisine'}</strong><small>{image.category || 'From the table'}</small></span>
           </button>
         ))}
@@ -102,7 +126,7 @@ export default function GalleryViewer({ images }: Props) {
     {selected && selectedIndex !== null && <div className="tv-gallery-lightbox" role="dialog" aria-modal="true" aria-label="Gallery image viewer" onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
       <div className="tv-gallery-lightbox__topbar"><span>{counter}</span><div className="tv-gallery-lightbox__actions"><button type="button" onClick={() => setZoom((value) => Math.max(1, Number((value - 0.25).toFixed(2))))} disabled={zoom <= 1} aria-label="Zoom out">−</button><span>{Math.round(zoom * 100)}%</span><button type="button" onClick={() => setZoom((value) => Math.min(3, Number((value + 0.25).toFixed(2))))} disabled={zoom >= 3} aria-label="Zoom in">+</button><button type="button" onClick={close} aria-label="Close image viewer">×</button></div></div>
       <button type="button" className="tv-gallery-lightbox__nav tv-gallery-lightbox__nav--prev" onClick={() => move(-1)} aria-label="Previous image">‹</button>
-      <figure className="tv-gallery-lightbox__figure"><div className="tv-gallery-lightbox__canvas"><Image src={selected.imageUrl} alt={selected.caption || selected.category || 'Timavelle Cuisine gallery image'} width={1600} height={1200} unoptimized className="tv-gallery-lightbox__image" style={{ transform: `scale(${zoom})` }} priority /></div><figcaption><strong>{selected.caption || 'Timavelle Cuisine'}</strong><span>{selected.category || 'From the table'}</span></figcaption></figure>
+      <figure className="tv-gallery-lightbox__figure" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}><div className="tv-gallery-lightbox__canvas"><Image key={selected._id} src={galleryFull(selected.imageUrl)} alt={selected.caption || selected.category || 'Timavelle Cuisine gallery image'} width={1600} height={1200} unoptimized className="tv-gallery-lightbox__image" style={{ transform: `scale(${zoom})` }} priority /></div><figcaption><strong>{selected.caption || 'Timavelle Cuisine'}</strong><span>{selected.category || 'From the table'}</span></figcaption></figure>
       <button type="button" className="tv-gallery-lightbox__nav tv-gallery-lightbox__nav--next" onClick={() => move(1)} aria-label="Next image">›</button>
     </div>}
   </>;
